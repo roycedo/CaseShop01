@@ -15,19 +15,24 @@ Public Class DAL
         Dim intStart As Integer = 0
         Dim intEnd As Integer = 0
         Dim ds As New DataSet
-        ds = MySqlHelper.ExecuteDataset(ComConfig.DB.connectString, strSql)
-        If ds.Tables.Count > 0 AndAlso ds.Tables(0).Rows.Count > 0 Then
-            intStart = ds.Tables(0).Rows(0).Item("minNum").ToString
-            intEnd = ds.Tables(0).Rows(0).Item("maxNum").ToString
-        Else
-            strSql = String.Empty
-            strSql += "update keyword set " & vbCrLf
-            strSql += "is_parser = 0 " & vbCrLf
-            strSql += "where is_parser = 1 " & vbCrLf
-            MySqlHelper.ExecuteNonQuery(ComConfig.DB.connectString, strSql)
-        End If
-        ds.Dispose()
+        Try
+            ds = MySqlHelper.ExecuteDataset(ComConfig.DB.connectString, strSql)
+            If ds.Tables.Count > 0 AndAlso ds.Tables(0).Rows.Count > 0 Then
+                intStart = ds.Tables(0).Rows(0).Item("minNum").ToString
+                intEnd = ds.Tables(0).Rows(0).Item("maxNum").ToString
+            Else
+                strSql = String.Empty
+                strSql += "update keyword set " & vbCrLf
+                strSql += "is_parser = 0 " & vbCrLf
+                strSql += "where is_parser = 1 " & vbCrLf
+                MySqlHelper.ExecuteNonQuery(ComConfig.DB.connectString, strSql)
+            End If
+        Catch ex As Exception
 
+        Finally
+            ds.Dispose()
+        End Try
+        
         strSql = String.Empty
         strSql += "select id, name, level from keyword " & vbCrLf
         strSql += "where is_parser = 0 and id between ?intStart and ?intEnd " & vbCrLf
